@@ -8,137 +8,110 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 35vh; max-height: 300px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin: auto; height: 300px; }
         .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 700; }
-        .tab-inactive { border-bottom: 3px solid transparent; color: #94a3b8; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
         .hidden-section { display: none; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
-        .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.2s ease; }
-        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary { background: #2563eb; transition: all 0.2s; }
+        .btn-primary:active { transform: scale(0.95); }
+        .card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Chosen Palette: Slate & Royal Blue (Industrial-Professional) -->
-    <!-- Application Structure Plan: SPA con filtrado de dispositivos Bluetooth optimizado. Se ha modificado la lógica de emparejamiento para incluir filtros por nombre (filters: [{namePrefix: 'PPT'}, {namePrefix: '3nS'}]) lo que reduce drásticamente la lista de dispositivos visibles a solo los relevantes para el usuario, solucionando el problema de la "lista infinita". -->
-    <!-- Visualization & Content Choices: Dashboard interactivo con Chart.js para monitoreo de impresión y guías visuales de configuración para Android. -->
+    <!-- Chosen Palette: Indigo & Slate (Industrial) -->
+    <!-- Application Structure Plan: Aplicación de una sola página con lógica de conexión Bluetooth mejorada. Se ha implementado un sistema de búsqueda dual: primero intenta filtrar por el servicio estándar de impresoras térmicas (UUID 18f0) y, si falla, permite al usuario ver todos los dispositivos. Esto resuelve el problema de "dispositivos no encontrados" causado por nombres de Bluetooth no estandarizados en la 3nStar. -->
+    <!-- Visualization & Content Choices: Gráficos de Chart.js para monitoreo de etiquetas y sección de depuración técnica para asegurar la compatibilidad con Android Chrome. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">3n</div>
-                    <span class="font-bold text-lg text-slate-800">SmartPrint Mobile</span>
-                </div>
-                <div class="flex space-x-6 h-full">
-                    <button id="tab-op" class="tab-active px-2 text-sm" onclick="switchTab('op')">Imprimir</button>
-                    <button id="tab-help" class="tab-inactive px-2 text-sm" onclick="switchTab('help')">Configuración</button>
-                    <button id="tab-stat" class="tab-inactive px-2 text-sm" onclick="switchTab('stat')">Reportes</button>
-                </div>
+    <nav class="bg-white border-b sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 flex justify-between items-center h-16">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-xs">3N</div>
+                <span class="font-bold text-slate-800">PPT305BT Web</span>
+            </div>
+            <div class="flex gap-4">
+                <button id="tab-op" class="tab-active py-5 px-1 text-sm" onclick="switchTab('op')">Impresora</button>
+                <button id="tab-stat" class="tab-inactive py-5 px-1 text-sm" onclick="switchTab('stat')">Métricas</button>
             </div>
         </div>
     </nav>
 
-    <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full space-y-6">
         
-        <!-- Notificaciones -->
-        <div id="toast" class="opacity-0 pointer-events-none fixed top-20 left-1/2 -translate-x-1/2 glass-card px-6 py-3 rounded-full shadow-xl z-[100] transition-all duration-300 transform -translate-y-4">
-            <span id="toast-message" class="text-sm font-semibold text-blue-800 italic">Cargando...</span>
+        <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full text-sm opacity-0 pointer-events-none transition-all shadow-xl z-50">
+            <span id="toast-msg">Mensaje</span>
         </div>
 
-        <!-- SECCIÓN: OPERACIÓN (FILTRADO OPTIMIZADO) -->
+        <!-- SECCIÓN DE OPERACIÓN -->
         <section id="sec-op" class="space-y-6">
-            <div class="glass-card p-6 rounded-2xl shadow-sm">
-                <div class="mb-8">
-                    <h1 class="text-2xl font-extrabold text-slate-900">Control de Etiquetado</h1>
-                    <p class="text-slate-500 text-sm">Escanea y genera etiquetas instantáneas para la PPT305BT.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                    <!-- Estado de Conexión -->
-                    <div class="md:col-span-5">
-                        <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl text-center">
-                            <div id="status-icon" class="text-4xl mb-3">📶</div>
-                            <h2 id="status-text" class="font-bold text-slate-800">Sin Conexión</h2>
-                            <p class="text-xs text-slate-400 mt-1 px-4">Solo se mostrarán dispositivos compatibles con el modelo PPT.</p>
-                            
-                            <div class="mt-6 space-y-3">
-                                <button id="btn-connect" class="btn-primary w-full text-white font-bold py-3 rounded-xl shadow-md hover:shadow-lg">
-                                    Buscar Impresora
-                                </button>
-                                <button id="btn-disconnect" class="hidden w-full bg-white border border-red-200 text-red-600 font-bold py-3 rounded-xl hover:bg-red-50 transition-colors">
-                                    Desconectar
-                                </button>
-                            </div>
+            <div class="card p-6">
+                <div class="flex flex-col md:flex-row gap-8">
+                    <!-- Conector -->
+                    <div class="md:w-1/3 flex flex-col items-center justify-center bg-slate-50 rounded-xl p-6 border border-dashed border-slate-300">
+                        <div id="status-icon" class="text-5xl mb-4">📴</div>
+                        <h2 id="status-label" class="font-bold text-slate-700 text-center">Desconectada</h2>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">3nStar PPT305BT</p>
+                        
+                        <div class="w-full mt-6 space-y-3">
+                            <button id="btn-connect" class="btn-primary w-full text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-700">
+                                Buscar Impresora
+                            </button>
+                            <button id="btn-show-all" class="w-full text-blue-600 text-xs font-semibold hover:underline">
+                                ¿No aparece? Ver todos
+                            </button>
+                            <button id="btn-disconnect" class="hidden w-full bg-white border border-red-200 text-red-600 py-2 rounded-lg text-sm font-bold">
+                                Desconectar
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Formulario de Impresión -->
-                    <div class="md:col-span-7 space-y-5">
-                        <div class="bg-white border border-slate-200 p-5 rounded-2xl">
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-tighter mb-2">Entrada de Datos</label>
-                            <div class="space-y-4">
-                                <div class="relative">
-                                    <input type="text" id="barcode-input" placeholder="Código de barras..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-12 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-mono text-lg">
-                                    <div class="absolute right-4 top-3.5 text-slate-300">📋</div>
-                                </div>
-                                <input type="text" id="product-name" placeholder="Nombre del artículo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                    <!-- Datos -->
+                    <div class="md:w-2/3 space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Información del Producto</label>
+                            <input type="text" id="prod-name" placeholder="Nombre del artículo..." class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Código de Barras</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="barcode-val" placeholder="Escanear código..." class="flex-grow p-4 bg-white border border-slate-200 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 outline-none">
                             </div>
                         </div>
 
-                        <button id="btn-print" disabled class="w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl cursor-not-allowed flex items-center justify-center gap-3 text-lg uppercase tracking-wide">
-                            Generar Ticket
+                        <button id="btn-print" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-xl cursor-not-allowed text-lg shadow-inner">
+                            IMPRIMIR ETIQUETA
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Guía de Filtrado (Contexto para el usuario) -->
-            <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3">
-                <span class="text-blue-500">ℹ️</span>
-                <p class="text-xs text-blue-700 leading-tight">
-                    <b>Filtro Inteligente Activo:</b> Se ha configurado el sistema para ignorar otros dispositivos Bluetooth (relojes, TVs). Solo verás impresoras que comiencen con "PPT", "3nS" o "Printer".
-                </p>
+            <!-- Ayuda en caso de falla -->
+            <div class="card p-5 bg-blue-50 border-blue-100">
+                <h3 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-2">
+                    <span>💡</span> Guía de conexión rápida
+                </h3>
+                <ul class="text-xs text-blue-700 space-y-2 list-disc ml-4">
+                    <li>Asegúrate de que la impresora no esté conectada a otra aplicación.</li>
+                    <li>Si usas Android, activa el <b>GPS/Ubicación</b>, de lo contrario Chrome no encontrará el Bluetooth.</li>
+                    <li>Para resultados óptimos, vincula la impresora en los ajustes del teléfono antes de usar esta web.</li>
+                </ul>
             </div>
         </section>
 
-        <!-- SECCIÓN: CONFIGURACIÓN (SOLUCIÓN DE PROBLEMAS) -->
-        <section id="sec-help" class="hidden-section space-y-6">
-            <div class="glass-card p-8 rounded-2xl">
-                <h2 class="text-xl font-bold text-slate-900 mb-4">Ajustes Críticos para Android</h2>
-                <div class="grid grid-cols-1 gap-4">
-                    <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
-                        <h4 class="font-bold text-yellow-800 text-sm">1. Visibilidad de Dispositivos</h4>
-                        <p class="text-xs text-yellow-700 mt-1">Si no ves tu impresora, asegúrate de que esté vinculada previamente en el menú de Bluetooth de tu teléfono Android.</p>
-                    </div>
-                    <div class="p-4 bg-slate-100 rounded-lg">
-                        <h4 class="font-bold text-slate-800 text-sm">2. Habilitar API en Chrome</h4>
-                        <p class="text-xs text-slate-600 mt-1">Copia y pega: <code class="bg-white px-1 font-mono text-blue-600">chrome://flags/#enable-web-bluetooth-new-permissions-backend</code>. Marca como "Enabled" y reinicia Chrome.</p>
-                    </div>
-                    <div class="p-4 bg-slate-100 rounded-lg">
-                        <h4 class="font-bold text-slate-800 text-sm">3. Permisos de Ubicación</h4>
-                        <p class="text-xs text-slate-600 mt-1">En Android 10+, Chrome necesita permiso de <b>Ubicación</b> para encontrar dispositivos Bluetooth cercanos.</p>
-                    </div>
+        <!-- SECCIÓN DE MÉTRICAS -->
+        <section id="sec-stat" class="hidden-section grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="card p-6">
+                <h3 class="text-center font-bold text-slate-500 text-xs uppercase mb-4">Etiquetas por Hora</h3>
+                <div class="chart-container">
+                    <canvas id="chart-hourly"></canvas>
                 </div>
             </div>
-        </section>
-
-        <!-- SECCIÓN: ESTADÍSTICAS -->
-        <section id="sec-stat" class="hidden-section space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-sm font-bold text-slate-500 mb-6 text-center">Actividad de Etiquetado</h3>
-                    <div class="chart-container">
-                        <canvas id="mainChart"></canvas>
-                    </div>
-                </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-sm font-bold text-slate-500 mb-6 text-center">Formatos Utilizados</h3>
-                    <div class="chart-container">
-                        <canvas id="typeChart"></canvas>
-                    </div>
+            <div class="card p-6">
+                <h3 class="text-center font-bold text-slate-500 text-xs uppercase mb-4">Estado de Batería (Simulado)</h3>
+                <div class="chart-container">
+                    <canvas id="chart-battery"></canvas>
                 </div>
             </div>
         </section>
@@ -148,184 +121,175 @@
     <script>
         const state = {
             device: null,
-            characteristic: null,
+            char: null,
             isConnected: false
         };
 
         const ui = {
             btnConnect: document.getElementById('btn-connect'),
+            btnShowAll: document.getElementById('btn-show-all'),
             btnDisconnect: document.getElementById('btn-disconnect'),
             btnPrint: document.getElementById('btn-print'),
-            statusText: document.getElementById('status-text'),
+            statusLabel: document.getElementById('status-label'),
             statusIcon: document.getElementById('status-icon'),
-            barcodeInput: document.getElementById('barcode-input'),
-            productName: document.getElementById('product-name'),
             toast: document.getElementById('toast'),
-            toastMsg: document.getElementById('toast-message')
+            toastMsg: document.getElementById('toast-msg'),
+            barcode: document.getElementById('barcode-val'),
+            pName: document.getElementById('prod-name')
         };
 
-        function switchTab(tabId) {
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('tab-active');
-                btn.classList.add('tab-inactive');
-            });
-            document.getElementById('tab-' + tabId).classList.replace('tab-inactive', 'tab-active');
-
-            ['sec-op', 'sec-stat', 'sec-help'].forEach(id => document.getElementById(id).classList.add('hidden-section'));
-            document.getElementById('sec-' + tabId).classList.remove('hidden-section');
-
-            if(tabId === 'stat') renderCharts();
-        }
-
-        function showToast(msg) {
-            ui.toastMsg.textContent = msg;
-            ui.toast.classList.replace('opacity-0', 'opacity-100');
-            ui.toast.classList.replace('-translate-y-4', 'translate-y-0');
+        function showMsg(m) {
+            ui.toastMsg.innerText = m;
+            ui.toast.style.opacity = "1";
+            ui.toast.style.bottom = "40px";
             setTimeout(() => {
-                ui.toast.classList.replace('opacity-100', 'opacity-0');
-                ui.toast.classList.replace('translate-y-0', '-translate-y-4');
+                ui.toast.style.opacity = "0";
+                ui.toast.style.bottom = "10px";
             }, 3000);
         }
 
-        // --- LÓGICA DE BLUETOOTH CON FILTRADO ---
-        ui.btnConnect.addEventListener('click', async () => {
-            try {
-                // SOLUCIÓN AL PROBLEMA DEL USUARIO: Filtrar por nombre
-                // Esto hará que Chrome ignore automáticamente relojes, TVs, etc.
-                const device = await navigator.bluetooth.requestDevice({
-                    filters: [
-                        { namePrefix: 'PPT' },      // Modelo 3nStar
-                        { namePrefix: '3n' },       // Marca 3nStar
-                        { namePrefix: 'Printer' },  // Nombres genéricos de impresoras
-                        { namePrefix: 'BT' }        // Otros modelos comunes
-                    ],
-                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-                });
+        function switchTab(t) {
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('tab-active');
+                b.classList.add('tab-inactive');
+            });
+            document.getElementById('tab-' + t).className = 'tab-active py-5 px-1 text-sm';
+            
+            document.getElementById('sec-op').classList.add('hidden-section');
+            document.getElementById('sec-stat').classList.add('hidden-section');
+            document.getElementById('sec-' + t).classList.remove('hidden-section');
+            
+            if(t === 'stat') initCharts();
+        }
 
-                showToast("Vinculando con " + device.name + "...");
+        async function connectBluetooth(filterMode = 'smart') {
+            if (!navigator.bluetooth) {
+                showMsg("Error: Su navegador no soporta Bluetooth Web.");
+                return;
+            }
+
+            try {
+                let options = {};
+                
+                if (filterMode === 'smart') {
+                    // Estrategia: Buscar por el servicio estándar de impresoras (GATT 18f0)
+                    // y nombres comunes de la marca 3nStar
+                    options = {
+                        filters: [
+                            { services: ['000018f0-0000-1000-8000-00805f9b34fb'] },
+                            { namePrefix: 'PPT' },
+                            { namePrefix: 'MPT' },
+                            { namePrefix: '3n' },
+                            { namePrefix: 'Printer' }
+                        ],
+                        optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                    };
+                } else {
+                    // Modo "Ver todo" (Aparecerán muchos, pero asegura que esté el tuyo)
+                    options = {
+                        acceptAllDevices: true,
+                        optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                    };
+                }
+
+                showMsg("Abriendo selector de dispositivos...");
+                const device = await navigator.bluetooth.requestDevice(options);
+                
+                showMsg("Conectando...");
                 const server = await device.gatt.connect();
                 
+                // Buscar característica de escritura
                 const services = await server.getPrimaryServices();
-                let writeChar = null;
+                let foundChar = null;
 
-                for (const service of services) {
-                    const chars = await service.getCharacteristics();
-                    for (const char of chars) {
-                        if (char.properties.write || char.properties.writeWithoutResponse) {
-                            writeChar = char;
+                for (const s of services) {
+                    const chars = await s.getCharacteristics();
+                    for (const c of chars) {
+                        if (c.properties.write || c.properties.writeWithoutResponse) {
+                            foundChar = c;
                             break;
                         }
                     }
-                    if (writeChar) break;
+                    if (foundChar) break;
                 }
 
-                if (!writeChar) throw new Error("Canal de impresión no encontrado.");
+                if (!foundChar) throw new Error("No se pudo hallar el canal de impresión.");
 
                 state.device = device;
-                state.characteristic = writeChar;
+                state.char = foundChar;
                 state.isConnected = true;
 
-                // Actualizar Interfaz
-                ui.statusText.textContent = device.name;
-                ui.statusIcon.textContent = "✅";
+                // UI Update
+                ui.statusLabel.innerText = device.name || "Impresora Conectada";
+                ui.statusIcon.innerText = "🔋";
                 ui.btnConnect.classList.add('hidden');
+                ui.btnShowAll.classList.add('hidden');
                 ui.btnDisconnect.classList.remove('hidden');
                 ui.btnPrint.disabled = false;
-                ui.btnPrint.classList.replace('bg-slate-200', 'bg-blue-600');
-                ui.btnPrint.classList.replace('text-slate-400', 'text-white');
-                ui.btnPrint.classList.remove('cursor-not-allowed');
-                
-                showToast("Conexión Establecida");
+                ui.btnPrint.className = "w-full bg-blue-600 text-white font-black py-5 rounded-xl shadow-lg";
 
-            } catch (error) {
-                console.warn(error);
-                if(error.name !== 'NotFoundError') {
-                    showToast("Error: " + error.message);
-                }
+                showMsg("¡Conectado exitosamente!");
+
+            } catch (e) {
+                console.error(e);
+                if (e.name !== 'NotFoundError') showMsg("Error: " + e.message);
             }
-        });
+        }
 
-        ui.btnDisconnect.addEventListener('click', () => {
-            if (state.device && state.device.gatt.connected) {
-                state.device.gatt.disconnect();
-            }
-            state.isConnected = false;
-            ui.statusText.textContent = "Sin Conexión";
-            ui.statusIcon.textContent = "📶";
-            ui.btnConnect.classList.remove('hidden');
-            ui.btnDisconnect.classList.add('hidden');
-            ui.btnPrint.disabled = true;
-            ui.btnPrint.classList.add('bg-slate-200', 'text-slate-400', 'cursor-not-allowed');
-            showToast("Desconectado");
-        });
+        ui.btnConnect.onclick = () => connectBluetooth('smart');
+        ui.btnShowAll.onclick = () => connectBluetooth('all');
 
-        ui.btnPrint.addEventListener('click', async () => {
-            const barcode = ui.barcodeInput.value.trim();
-            const product = ui.productName.value.trim();
+        ui.btnDisconnect.onclick = () => {
+            if (state.device) state.device.gatt.disconnect();
+            location.reload(); // Reset simple
+        };
 
-            if (!barcode) return showToast("Ingrese un código válido");
+        ui.btnPrint.onclick = async () => {
+            const bc = ui.barcode.value.trim();
+            const pn = ui.pName.value.trim();
+            if (!bc) return showMsg("Ingrese un código.");
 
             try {
                 const encoder = new TextEncoder();
-                // Secuencia de impresión ESC/POS
-                const commands = [
-                    new Uint8Array([0x1B, 0x40]), // Reset
-                    new Uint8Array([0x1B, 0x61, 0x01]), // Centro
-                    encoder.encode("\n" + product.toUpperCase() + "\n"),
-                    new Uint8Array([0x1D, 0x68, 0x50]), // Altura 80
+                // Protocolo ESC/POS para la 3nStar
+                const cmds = [
+                    new Uint8Array([0x1B, 0x40]), // Inicializar
+                    new Uint8Array([0x1B, 0x61, 0x01]), // Centrar
+                    encoder.encode("\n" + pn.toUpperCase() + "\n\n"),
+                    new Uint8Array([0x1D, 0x68, 0x64]), // Altura 100
                     new Uint8Array([0x1D, 0x77, 0x03]), // Ancho 3
                     new Uint8Array([0x1D, 0x6B, 0x04]), // CODE39
-                    encoder.encode(barcode),
-                    new Uint8Array([0x00]), // Terminar barcode
-                    new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A]) // Salto de papel
+                    encoder.encode(bc),
+                    new Uint8Array([0x00]), // Fin barcode
+                    new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A]) // Salto papel
                 ];
 
-                for (const cmd of commands) {
-                    await state.characteristic.writeValue(cmd);
+                for (const c of cmds) {
+                    await state.char.writeValue(c);
                 }
-                showToast("Enviado a impresora");
-                ui.barcodeInput.value = "";
-                ui.productName.value = "";
+                showMsg("Imprimiendo...");
             } catch (err) {
-                showToast("Fallo de impresión: " + err.message);
+                showMsg("Error al imprimir: " + err.message);
             }
-        });
+        };
 
-        let chartsLoaded = false;
-        function renderCharts() {
-            if (chartsLoaded) return;
-            
-            const commonOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            };
-
-            new Chart(document.getElementById('mainChart'), {
-                type: 'bar',
+        function initCharts() {
+            new Chart(document.getElementById('chart-hourly'), {
+                type: 'line',
                 data: {
-                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
-                    datasets: [{
-                        data: [45, 82, 60, 110, 95],
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 8
-                    }]
+                    labels: ['08:00', '10:00', '12:00', '14:00', '16:00'],
+                    datasets: [{ data: [12, 45, 30, 80, 55], borderColor: '#2563eb', tension: 0.3 }]
                 },
-                options: commonOptions
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
-
-            new Chart(document.getElementById('typeChart'), {
+            new Chart(document.getElementById('chart-battery'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['Precios', 'Envío', 'Inventario'],
-                    datasets: [{
-                        data: [65, 20, 15],
-                        backgroundColor: ['#2563eb', '#93c5fd', '#e2e8f0']
-                    }]
+                    labels: ['Restante', 'Consumido'],
+                    datasets: [{ data: [75, 25], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth: 0 }]
                 },
-                options: { ...commonOptions, cutout: '70%' }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false } } }
             });
-            chartsLoaded = true;
         }
     </script>
 </body>
