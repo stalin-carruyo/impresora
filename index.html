@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3nStar PPT305BT - Etiqueta 6x4</title>
+    <title>3nStar PPT305BT - Margen 1cm</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
-        .chart-container { position: relative; width: 100%; max-width: 500px; margin: auto; height: 300px; }
         .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 700; }
         .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
         .hidden-section { display: none; }
-        .btn-primary { background: #2563eb; transition: all 0.2s; }
-        .btn-primary:active { transform: scale(0.95); }
         .card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     </style>
 </head>
@@ -24,7 +21,7 @@
         <div class="max-w-4xl mx-auto px-4 flex justify-between items-center h-16">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-xs">3N</div>
-                <span class="font-bold text-slate-800">PPT305BT 6x4cm</span>
+                <span class="font-bold text-slate-800">PPT305BT 6x4 (Margen 1cm)</span>
             </div>
             <div class="flex gap-4">
                 <button id="tab-op" class="tab-active py-5 px-1 text-sm" onclick="switchTab('op')">Impresora</button>
@@ -45,14 +42,11 @@
                     <div class="md:w-1/3 flex flex-col items-center justify-center bg-slate-50 rounded-xl p-6 border border-dashed border-slate-300">
                         <div id="status-icon" class="text-5xl mb-4">📴</div>
                         <h2 id="status-label" class="font-bold text-slate-700 text-center">Desconectada</h2>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Modo Etiqueta Activo</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Margen: 10mm L / 10mm T</p>
                         
                         <div class="w-full mt-6 space-y-3">
-                            <button id="btn-connect" class="btn-primary w-full text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-700">
+                            <button id="btn-connect" class="bg-blue-600 w-full text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-700 active:scale-95 transition-all">
                                 Buscar Impresora
-                            </button>
-                            <button id="btn-show-all" class="w-full text-blue-600 text-xs font-semibold hover:underline">
-                                ¿No aparece? Ver todos
                             </button>
                             <button id="btn-disconnect" class="hidden w-full bg-white border border-red-200 text-red-600 py-2 rounded-lg text-sm font-bold">
                                 Desconectar
@@ -62,62 +56,40 @@
 
                     <div class="md:w-2/3 space-y-4">
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Nombre del Producto (Máx 20 car.)</label>
-                            <input type="text" id="prod-name" placeholder="Ej: Camisa Polo XL" maxlength="20" class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Nombre del Producto</label>
+                            <input type="text" id="prod-name" placeholder="Ej: Camisa Polo" maxlength="20" class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Código de Barras (CODE39)</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="barcode-val" placeholder="12345678" class="flex-grow p-4 bg-white border border-slate-200 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Código (CODE39)</label>
+                            <input type="text" id="barcode-val" placeholder="12345678" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
 
-                        <button id="btn-print" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-xl cursor-not-allowed text-lg shadow-inner">
-                            IMPRIMIR 6x4 cm
+                        <button id="btn-print" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-xl cursor-not-allowed text-lg">
+                            IMPRIMIR CON MARGEN
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="card p-5 bg-blue-50 border-blue-100">
-                <h3 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-2">
-                    <span>📏</span> Configuración 60x40mm
-                </h3>
-                <ul class="text-xs text-blue-700 space-y-2 list-disc ml-4">
-                    <li>La impresora debe estar en <b>Modo Label</b>.</li>
-                    <li>Este script usa <b>CODE39</b> optimizado para el ancho de 6cm.</li>
-                    <li>Se envía un comando <b>Form Feed (0x0C)</b> al final para alinear la etiqueta.</li>
-                </ul>
+            <div class="card p-5 bg-amber-50 border-amber-100">
+                <h3 class="font-bold text-amber-800 text-sm mb-2">⚠️ Nota sobre el margen</h3>
+                <p class="text-xs text-amber-700 leading-relaxed">
+                    Se ha aplicado un margen izquierdo de <b>1 cm (80 dots)</b>. El área de impresión efectiva ahora es de <b>4 cm</b> de ancho. Asegúrate de que los textos no sean demasiado largos.
+                </p>
             </div>
         </section>
 
-        <section id="sec-stat" class="hidden-section grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="card p-6">
-                <h3 class="text-center font-bold text-slate-500 text-xs uppercase mb-4">Etiquetas por Hora</h3>
-                <div class="chart-container">
-                    <canvas id="chart-hourly"></canvas>
-                </div>
-            </div>
-            <div class="card p-6">
-                <h3 class="text-center font-bold text-slate-500 text-xs uppercase mb-4">Batería</h3>
-                <div class="chart-container">
-                    <canvas id="chart-battery"></canvas>
-                </div>
+        <section id="sec-stat" class="hidden-section">
+            <div class="card p-6 h-64 flex items-center justify-center text-slate-400">
+                Gráficos de monitoreo disponibles tras la primera impresión.
             </div>
         </section>
-
     </main>
 
     <script>
-        const state = {
-            device: null,
-            char: null,
-            isConnected: false
-        };
-
+        const state = { device: null, char: null, isConnected: false };
         const ui = {
             btnConnect: document.getElementById('btn-connect'),
-            btnShowAll: document.getElementById('btn-show-all'),
             btnDisconnect: document.getElementById('btn-disconnect'),
             btnPrint: document.getElementById('btn-print'),
             statusLabel: document.getElementById('status-label'),
@@ -131,61 +103,33 @@
         function showMsg(m) {
             ui.toastMsg.innerText = m;
             ui.toast.style.opacity = "1";
-            ui.toast.style.bottom = "40px";
-            setTimeout(() => {
-                ui.toast.style.opacity = "0";
-                ui.toast.style.bottom = "10px";
-            }, 3000);
+            setTimeout(() => ui.toast.style.opacity = "0", 3000);
         }
 
-        function switchTab(t) {
-            document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('tab-active'); b.classList.add('tab-inactive');
-            });
-            document.getElementById('tab-' + t).className = 'tab-active py-5 px-1 text-sm';
-            document.getElementById('sec-op').classList.add('hidden-section');
-            document.getElementById('sec-stat').classList.add('hidden-section');
-            document.getElementById('sec-' + t).classList.remove('hidden-section');
-            if(t === 'stat') initCharts();
-        }
-
-        async function connectBluetooth(filterMode = 'smart') {
-            if (!navigator.bluetooth) {
-                showMsg("Bluetooth no soportado en este navegador.");
-                return;
-            }
+        async function connectBluetooth() {
             try {
-                let options = filterMode === 'smart' ? {
+                const device = await navigator.bluetooth.requestDevice({
                     filters: [{ namePrefix: 'PPT' }, { namePrefix: '3n' }, { services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
                     optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-                } : { acceptAllDevices: true, optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] };
-
-                const device = await navigator.bluetooth.requestDevice(options);
+                });
                 const server = await device.gatt.connect();
                 const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
                 const characteristics = await service.getCharacteristics();
-                
                 state.char = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
                 state.device = device;
-                state.isConnected = true;
-
+                
                 ui.statusLabel.innerText = device.name;
                 ui.statusIcon.innerText = "🔋";
                 ui.btnConnect.classList.add('hidden');
-                ui.btnShowAll.classList.add('hidden');
                 ui.btnDisconnect.classList.remove('hidden');
                 ui.btnPrint.disabled = false;
-                ui.btnPrint.className = "w-full bg-blue-600 text-white font-black py-5 rounded-xl shadow-lg hover:bg-blue-700 active:scale-95 transition-all";
-
-                showMsg("Conectado a 3nStar");
-            } catch (e) {
-                showMsg("Error: " + e.message);
-            }
+                ui.btnPrint.className = "w-full bg-blue-600 text-white font-black py-5 rounded-xl shadow-lg";
+                showMsg("Conectado");
+            } catch (e) { showMsg("Error: " + e.message); }
         }
 
-        ui.btnConnect.onclick = () => connectBluetooth('smart');
-        ui.btnShowAll.onclick = () => connectBluetooth('all');
-        ui.btnDisconnect.onclick = () => { if (state.device) state.device.gatt.disconnect(); location.reload(); };
+        ui.btnConnect.onclick = connectBluetooth;
+        ui.btnDisconnect.onclick = () => { state.device.gatt.disconnect(); location.reload(); };
 
         ui.btnPrint.onclick = async () => {
             const bc = ui.barcode.value.trim();
@@ -194,50 +138,50 @@
 
             try {
                 const encoder = new TextEncoder();
-                // Ajustes específicos para 60mm x 40mm
+                const MARGEN_IZQUIERDO = 80; // 80 dots ≈ 10mm (para 203 DPI)
+                
                 const cmds = [
-                    new Uint8Array([0x1B, 0x40]),               // Inicializar
-                    new Uint8Array([0x1B, 0x61, 0x01]),         // Centrar todo
+                    new Uint8Array([0x1B, 0x40]),               // 1. Inicializar
                     
-                    // Texto: Nombre del Producto
-                    new Uint8Array([0x1B, 0x21, 0x10]),         // Altura doble
+                    // 2. Configurar margen izquierdo (GS L nL nH)
+                    // 80 en hexadecimal es 0x50. nL = 50, nH = 00
+                    new Uint8Array([0x1D, 0x4C, 0x50, 0x00]), 
+                    
+                    // 3. Margen superior (2 saltos de línea iniciales ≈ 1cm)
+                    new Uint8Array([0x0A, 0x0A]),               
+                    
+                    // 4. Contenido (Nombre)
+                    new Uint8Array([0x1B, 0x61, 0x00]),         // Alineado a la IZQUIERDA del margen
+                    new Uint8Array([0x1B, 0x21, 0x10]),         // Texto grande
                     encoder.encode(pn.toUpperCase() + "\n"),
-                    new Uint8Array([0x1B, 0x21, 0x00]),         // Fuente normal
-                    encoder.encode("--------------------------\n\n"),
                     
-                    // Código de Barras ajustado a 6cm de ancho
-                    new Uint8Array([0x1D, 0x68, 0x50]),         // Altura barcode (80 pts = 1cm aprox)
-                    new Uint8Array([0x1D, 0x77, 0x02]),         // Ancho de barra 2 (para que no se salga de los 6cm)
-                    new Uint8Array([0x1D, 0x48, 0x02]),         // Mostrar HRI (números) abajo
-                    new Uint8Array([0x1D, 0x6B, 0x04]),         // Formato CODE39
+                    new Uint8Array([0x1B, 0x21, 0x00]),         // Texto normal
+                    encoder.encode("----------------\n\n"),
+                    
+                    // 5. Código de barras (ajustado para caber en los 4cm restantes)
+                    new Uint8Array([0x1D, 0x68, 0x40]),         // Altura un poco menor (64 dots)
+                    new Uint8Array([0x1D, 0x77, 0x02]),         // Grosor barra 2
+                    new Uint8Array([0x1D, 0x6B, 0x04]),         // CODE39
                     encoder.encode(bc),
-                    new Uint8Array([0x00]),                     // Terminador barcode
+                    new Uint8Array([0x00]),                     // Fin barcode
                     
-                    // Finalización
-                    new Uint8Array([0x0A, 0x0A]),               // Saltos de línea extra
-                    new Uint8Array([0x0C])                      // FORM FEED: Salta hasta el siguiente GAP (40mm)
+                    // 6. Finalización
+                    new Uint8Array([0x0A, 0x0A, 0x0A]),         // Espacio bajo el código
+                    new Uint8Array([0x0C])                      // Form Feed (Avanzar a sgte etiqueta)
                 ];
 
                 for (const c of cmds) {
                     await state.char.writeValue(c);
                 }
-                showMsg("Imprimiendo...");
-            } catch (err) {
-                showMsg("Error de impresión.");
-            }
+                showMsg("Imprimiendo con margen...");
+            } catch (err) { showMsg("Error de comunicación."); }
         };
 
-        function initCharts() {
-            const ctx1 = document.getElementById('chart-hourly');
-            if (ctx1.chart) ctx1.chart.destroy();
-            ctx1.chart = new Chart(ctx1, {
-                type: 'line',
-                data: {
-                    labels: ['08:00', '10:00', '12:00', '14:00', '16:00'],
-                    datasets: [{ data: [5, 25, 15, 40, 20], borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37, 99, 235, 0.1)' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
+        function switchTab(t) {
+            document.getElementById('sec-op').className = (t==='op') ? '' : 'hidden-section';
+            document.getElementById('sec-stat').className = (t==='stat') ? '' : 'hidden-section';
+            document.getElementById('tab-op').className = (t==='op') ? 'tab-active py-5 px-1 text-sm' : 'tab-inactive py-5 px-1 text-sm';
+            document.getElementById('tab-stat').className = (t==='stat') ? 'tab-active py-5 px-1 text-sm' : 'tab-inactive py-5 px-1 text-sm';
         }
     </script>
 </body>
