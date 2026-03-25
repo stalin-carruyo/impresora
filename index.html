@@ -196,28 +196,61 @@
             setTimeout(() => ui.toast.style.opacity = "0", 3500);
         }
 
-        async function connectBluetooth() {
-            try {
-                const device = await navigator.bluetooth.requestDevice({
-                    filters: [{ namePrefix: 'PPT' }, { namePrefix: '3n' }],
-                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-                });
-                const server = await device.gatt.connect();
-                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
-                const characteristics = await service.getCharacteristics();
-                state.char = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
-                state.device = device;
-                
-                ui.statusLabel.innerText = device.name;
-                ui.statusIcon.innerText = "🥩";
-                ui.btnConnect.classList.add('hidden');
-                ui.btnDisconnect.classList.remove('hidden');
-                ui.btnPrint.disabled = false;
-                ui.btnPrint.className = "w-full bg-gradient-to-r from-red-600 to-red-700 text-white font-black py-4 rounded-xl shadow-xl hover:from-red-700 hover:to-red-800 transition-all text-lg";
-                showMsg("✅ Conectado: " + device.name);
-            } catch (e) { showMsg("❌ Error: " + e.message); }
+   async function connectBluetooth() {
+    try {
+        // MODO AMPLIO: detecta TODOS los dispositivos primero
+        ui.statusIcon.innerText = "🔍";
+        ui.statusLabel.innerText = "Buscando...";
+        
+        const device = await navigator.bluetooth.requestDevice({
+            // Filtros más amplios - acepta PPT, 3nStar, o CUALQUIER impresora
+            filters: [
+                { namePrefix: 'PPT' },
+                { namePrefix: '3n' },
+                { namePrefix: 'Printer' },
+                { namePrefix: 'Impresora' },
+                { services: ['000018f0-0000-1000-8000-00805f9b34fb'] } // ESC/POS genérico
+            ],
+            // Opcional: acepta TODO si no encuentra
+            acceptAllDevices: true,  // ← CLAVE: evita que se cuelgue
+            optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'battery_service']
+        });
+        
+        ui.statusIcon.innerText = "🔄";
+        ui.statusLabel.innerText = "Conectando...";
+        
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+        const characteristics = await service.getCharacteristics();
+        
+        // Busca cualquier característica de escritura
+        state.char = characteristics.find(c => 
+            c.properties.write || 
+            c.properties.writeWithoutResponse || 
+            c.uuid.includes('char')
+        );
+        
+        if (!state.char) {
+            throw new Error("No se encontró característica de escritura");
         }
-
+        
+        state.device = device;
+        ui.statusLabel.innerText = device.name || "Impresora BT";
+        ui.statusIcon.innerText = "🥩";
+        ui.btnConnect.classList.add('hidden');
+        ui.btnDisconnect.classList.remove('hidden');
+        ui.btnPrint.disabled = false;
+        ui.btnPrint.className = "w-full bg-gradient-to-r from-red-600 to-red-700 text-white font-black py-4 rounded-xl shadow-xl hover:from-red-700 hover:to-red-800 transition-all text-lg";
+        
+        showMsg("✅ Conectado: " + (device.name || "PPT305BT"));
+        
+    } catch (e) {
+        console.error("Error completo:", e);
+        ui.statusIcon.innerText = "📴";
+        ui.statusLabel.innerText = "Error: " + e.message.slice(0,20);
+        showMsg("❌ " + e.message);
+    }
+}
         ui.btnConnect.onclick = connectBluetooth;
         ui.btnDisconnect.onclick = () => { state.device.gatt.disconnect(); location.reload(); };
 
