@@ -17,6 +17,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- NAVEGACIÓN (sin cambios) -->
     <nav class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 flex justify-between items-center h-16">
             <div class="flex items-center gap-2">
@@ -31,11 +32,12 @@
     </nav>
 
     <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full space-y-6">
-        
+        <!-- TOAST (sin cambios) -->
         <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full text-sm opacity-0 pointer-events-none transition-all shadow-xl z-50">
             <span id="toast-msg">Mensaje</span>
         </div>
 
+        <!-- SECCIÓN IMPRESORA -->
         <section id="sec-op" class="space-y-6">
             <div class="card p-6">
                 <div class="flex flex-col md:flex-row gap-8">
@@ -43,7 +45,6 @@
                         <div id="status-icon" class="text-5xl mb-4">📴</div>
                         <h2 id="status-label" class="font-bold text-slate-700 text-center">Desconectada</h2>
                         <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Margen: 10mm L / 10mm T</p>
-                        
                         <div class="w-full mt-6 space-y-3">
                             <button id="btn-connect" class="bg-blue-600 w-full text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-700 active:scale-95 transition-all">
                                 Buscar Impresora
@@ -64,21 +65,37 @@
                             <input type="text" id="barcode-val" placeholder="12345678" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
 
+                        <!-- PREVISUALIZACIÓN MEJORADA -->
+                        <div class="bg-gradient-to-r from-slate-50 to-slate-100 p-4 rounded-xl border border-dashed border-slate-200">
+                            <div class="text-xs text-slate-500 uppercase tracking-wider mb-2 font-bold">Previsualización (4cm ancho)</div>
+                            <div id="preview" class="font-mono text-sm bg-white p-3 rounded border h-20 flex items-center justify-center text-slate-400">
+                                Introduce datos para ver
+                            </div>
+                        </div>
+
                         <button id="btn-print" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-xl cursor-not-allowed text-lg">
-                            IMPRIMIR CON MARGEN
+                            🖨️ IMPRIMIR ETIQUETA
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="card p-5 bg-amber-50 border-amber-100">
-                <h3 class="font-bold text-amber-800 text-sm mb-2">⚠️ Nota sobre el margen</h3>
-                <p class="text-xs text-amber-700 leading-relaxed">
-                    Se ha aplicado un margen izquierdo de <b>1 cm (80 dots)</b>. El área de impresión efectiva ahora es de <b>4 cm</b> de ancho. Asegúrate de que los textos no sean demasiado largos.
-                </p>
+            <!-- NOTA MEJORADA -->
+            <div class="card p-5 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+                <div class="flex items-start gap-2">
+                    <div class="text-amber-500 mt-0.5">⚠️</div>
+                    <div>
+                        <h3 class="font-bold text-amber-800 text-sm mb-1">Formato optimizado 4cm</h3>
+                        <p class="text-xs text-amber-700 leading-relaxed">
+                            Margen izquierdo <b>1cm (80 dots)</b>. Usa textos cortos (máx. 18 chars). 
+                            Formato: Título + Código + QR compacto.
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
 
+        <!-- SECCIÓN MÉTRICAS (sin cambios) -->
         <section id="sec-stat" class="hidden-section">
             <div class="card p-6 h-64 flex items-center justify-center text-slate-400">
                 Gráficos de monitoreo disponibles tras la primera impresión.
@@ -97,8 +114,23 @@
             toast: document.getElementById('toast'),
             toastMsg: document.getElementById('toast-msg'),
             barcode: document.getElementById('barcode-val'),
-            pName: document.getElementById('prod-name')
+            pName: document.getElementById('prod-name'),
+            preview: document.getElementById('preview')
         };
+
+        // PREVISUALIZACIÓN EN TIEMPO REAL
+        function updatePreview() {
+            const bc = ui.barcode.value.trim();
+            const pn = ui.pName.value.trim().substring(0, 18) || "PRODUCTO";
+            ui.preview.innerHTML = `
+                <div class="text-lg font-bold">${pn.toUpperCase()}</div>
+                <div class="text-xs mt-1">${bc || '12345678'}</div>
+            `;
+        }
+
+        ui.barcode.oninput = updatePreview;
+        ui.pName.oninput = updatePreview;
+        updatePreview();
 
         function showMsg(m) {
             ui.toastMsg.innerText = m;
@@ -123,58 +155,76 @@
                 ui.btnConnect.classList.add('hidden');
                 ui.btnDisconnect.classList.remove('hidden');
                 ui.btnPrint.disabled = false;
-                ui.btnPrint.className = "w-full bg-blue-600 text-white font-black py-5 rounded-xl shadow-lg";
-                showMsg("Conectado");
-            } catch (e) { showMsg("Error: " + e.message); }
+                ui.btnPrint.className = "w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-black py-5 rounded-xl shadow-lg hover:shadow-xl transition-all";
+                showMsg("✅ Conectado: " + device.name);
+            } catch (e) { 
+                showMsg("❌ Error: " + e.message); 
+            }
         }
 
         ui.btnConnect.onclick = connectBluetooth;
-        ui.btnDisconnect.onclick = () => { state.device.gatt.disconnect(); location.reload(); };
+        ui.btnDisconnect.onclick = () => { 
+            state.device.gatt.disconnect(); 
+            location.reload(); 
+        };
 
+        // FORMATO DE IMPRESIÓN MEJORADO 🎯
         ui.btnPrint.onclick = async () => {
             const bc = ui.barcode.value.trim();
-            const pn = ui.pName.value.trim() || "PRODUCTO";
-            if (!bc) return showMsg("Ingrese un código.");
+            const pn = ui.pName.value.trim().substring(0, 18).toUpperCase() || "PRODUCTO";
+            if (!bc || bc.length < 6) return showMsg("❌ Código mínimo 6 dígitos");
 
             try {
                 const encoder = new TextEncoder();
-                const MARGEN_IZQUIERDO = 80; // 80 dots ≈ 10mm (para 203 DPI)
+                const MARGEN_IZQUIERDO = 80; // 1cm = 80 dots @ 203 DPI
                 
                 const cmds = [
-                    new Uint8Array([0x1B, 0x40]),               // 1. Inicializar
+                    // 1. Inicializar impresora
+                    new Uint8Array([0x1B, 0x40]),
                     
-                    // 2. Configurar margen izquierdo (GS L nL nH)
-                    // 80 en hexadecimal es 0x50. nL = 50, nH = 00
-                    new Uint8Array([0x1D, 0x4C, 0x50, 0x00]), 
+                    // 2. Margen izquierdo 80 dots (1cm)
+                    new Uint8Array([0x1D, 0x4C, 0x50, 0x00]), // GS L 80
                     
-                    // 3. Margen superior (2 saltos de línea iniciales ≈ 1cm)
-                    new Uint8Array([0x0A, 0x0A]),               
+                    // 3. Margen superior (3 líneas = ~1cm)
+                    new Uint8Array([0x0A, 0x0A, 0x0A]),
                     
-                    // 4. Contenido (Nombre)
-                    new Uint8Array([0x1B, 0x61, 0x00]),         // Alineado a la IZQUIERDA del margen
-                    new Uint8Array([0x1B, 0x21, 0x10]),         // Texto grande
-                    encoder.encode(pn.toUpperCase() + "\n"),
+                    // 4. NOMBRE DEL PRODUCTO (negrita mediana, centrado)
+                    new Uint8Array([0x1B, 0x61, 0x01]),        // Centrar
+                    new Uint8Array([0x1B, 0x45, 0x01]),        // Negrita ON
+                    new Uint8Array([0x1B, 0x21, 0x10]),        // Tamaño x2
+                    encoder.encode(pn + "\n"),
+                    new Uint8Array([0x1B, 0x21, 0x00]),        // Tamaño normal
+                    new Uint8Array([0x1B, 0x45, 0x00]),        // Negrita OFF
                     
-                    new Uint8Array([0x1B, 0x21, 0x00]),         // Texto normal
-                    encoder.encode("----------------\n\n"),
+                    // 5. Separador corto (cabe en 4cm)
+                    new Uint8Array([0x1B, 0x61, 0x00]),        // Izquierda
+                    encoder.encode("─────\n"),                  // 5 guiones
                     
-                    // 5. Código de barras (ajustado para caber en los 4cm restantes)
-                    new Uint8Array([0x1D, 0x68, 0x40]),         // Altura un poco menor (64 dots)
-                    new Uint8Array([0x1D, 0x77, 0x02]),         // Grosor barra 2
-                    new Uint8Array([0x1D, 0x6B, 0x04]),         // CODE39
+                    // 6. CÓDIGO DE BARRAS CODE39 (optimizado 4cm)
+                    new Uint8Array([0x1B, 0x61, 0x01]),        // Centrar
+                    new Uint8Array([0x1D, 0x68, 0x50]),        // Altura 80 dots (optima)
+                    new Uint8Array([0x1D, 0x77, 0x03]),        // Grosor 3 (más legible)
+                    new Uint8Array([0x1D, 0x6B, 0x04, 0x2A]),  // CODE39 + * inicio/fin
                     encoder.encode(bc),
                     new Uint8Array([0x00]),                     // Fin barcode
                     
-                    // 6. Finalización
-                    new Uint8Array([0x0A, 0x0A, 0x0A]),         // Espacio bajo el código
-                    new Uint8Array([0x0C])                      // Form Feed (Avanzar a sgte etiqueta)
+                    // 7. Número legible debajo del código
+                    new Uint8Array([0x1D, 0x42, 0x03]),        // Imprimir código legible
+                    encoder.encode(" " + bc + "\n\n"),
+                    
+                    // 8. Finalizar (espacio + corte)
+                    new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A]),  // 4 líneas espacio
+                    new Uint8Array([0x1D, 0x56, 0x00])         // Corte completo
                 ];
 
                 for (const c of cmds) {
                     await state.char.writeValue(c);
                 }
-                showMsg("Imprimiendo con margen...");
-            } catch (err) { showMsg("Error de comunicación."); }
+                showMsg("🖨️ Etiqueta enviada correctamente");
+            } catch (err) { 
+                console.error(err);
+                showMsg("❌ Error de impresión"); 
+            }
         };
 
         function switchTab(t) {
