@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3nStar PPT305BT - Etiqueta Carnicería</title>
+    <title>3nStar PPT305BT - Margen 1cm</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
@@ -12,7 +13,6 @@
         .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
         .hidden-section { display: none; }
         .card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .label-input { font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 0.5px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -20,8 +20,8 @@
     <nav class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 flex justify-between items-center h-16">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white font-bold text-xs">🥩</div>
-                <span class="font-bold text-slate-800">ETIQUETA CARNICERÍA 6x4</span>
+                <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-xs">3N</div>
+                <span class="font-bold text-slate-800">PPT305BT 6x4 (Margen 1cm)</span>
             </div>
             <div class="flex gap-4">
                 <button id="tab-op" class="tab-active py-5 px-1 text-sm" onclick="switchTab('op')">Impresora</button>
@@ -31,20 +31,21 @@
     </nav>
 
     <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full space-y-6">
+        
         <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full text-sm opacity-0 pointer-events-none transition-all shadow-xl z-50">
             <span id="toast-msg">Mensaje</span>
         </div>
 
         <section id="sec-op" class="space-y-6">
-            <!-- CONTROLES DE IMPRESORA (sin cambios) -->
             <div class="card p-6">
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="md:w-1/3 flex flex-col items-center justify-center bg-slate-50 rounded-xl p-6 border border-dashed border-slate-300">
                         <div id="status-icon" class="text-5xl mb-4">📴</div>
                         <h2 id="status-label" class="font-bold text-slate-700 text-center">Desconectada</h2>
                         <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Margen: 10mm L / 10mm T</p>
+                        
                         <div class="w-full mt-6 space-y-3">
-                            <button id="btn-connect" class="bg-red-600 w-full text-white font-bold py-3 rounded-lg shadow-md hover:bg-red-700 active:scale-95 transition-all">
+                            <button id="btn-connect" class="bg-blue-600 w-full text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-700 active:scale-95 transition-all">
                                 Buscar Impresora
                             </button>
                             <button id="btn-disconnect" class="hidden w-full bg-white border border-red-200 text-red-600 py-2 rounded-lg text-sm font-bold">
@@ -53,74 +54,34 @@
                         </div>
                     </div>
 
-                    <!-- FORMULARIO CARNICERÍA -->
-                    <div class="md:w-2/3 space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Producto</label>
-                                <input type="text" id="prod-name" maxlength="22" placeholder="FILET DISPRO CARNICERIA" class="label-input w-full p-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Código</label>
-                                <input type="text" id="barcode-val" maxlength="12" placeholder="2200171007953" class="label-input w-full p-3 bg-white border border-slate-200 rounded-lg font-mono focus:ring-2 focus:ring-red-500 outline-none">
-                            </div>
+                    <div class="md:w-2/3 space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Nombre del Producto</label>
+                            <input type="text" id="prod-name" placeholder="Ej: Camisa Polo" maxlength="20" class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Código (CODE39)</label>
+                            <input type="text" id="barcode-val" placeholder="12345678" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Peso (kg)</label>
-                                <input type="text" id="peso" maxlength="6" placeholder="0.705" class="label-input w-full p-3 bg-white border border-slate-200 rounded-lg text-right">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Precio/kg</label>
-                                <input type="text" id="precio-kg" maxlength="6" placeholder="6.74" class="label-input w-full p-3 bg-white border border-slate-200 rounded-lg text-right">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">Total</label>
-                                <input type="text" id="total" maxlength="5" placeholder="4.75" class="label-input w-full p-3 bg-white border border-slate-200 rounded-lg text-right font-bold bg-red-50">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">F.Venta</label>
-                                <input type="date" id="fventa" class="label-input w-full p-3 bg-white border border-slate-200 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase block mb-1">F.Vence</label>
-                                <input type="date" id="fvence" class="label-input w-full p-3 bg-white border border-slate-200 rounded-lg">
-                            </div>
-                        </div>
-
-                        <!-- PREVISUALIZACIÓN -->
-                        <div class="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border-2 border-dashed border-red-200">
-                            <div class="text-xs text-red-600 uppercase tracking-wider mb-3 font-bold flex items-center gap-1">
-                                🖨️ PREVISUALIZACIÓN EXACTA (4cm ancho)
-                            </div>
-                            <div id="preview" class="font-mono text-xs leading-tight bg-white p-3 rounded border max-h-32 overflow-y-auto text-slate-800">
-                                FILET DISPRO CARNICERIA<br>
-                                D/PECHO<br>
-                                PESO 0.705kg<br>
-                                F/VENTA 24/03 F/VENCE 08/01<br>
-                                M+<br>
-                                PRECIO 6.74/kg TOTAL A PAGAR 4.75<br>
-                                ════════════════════<br>
-                                ║███████████║████║<br>
-                                2200171007953
-                            </div>
-                        </div>
-
-                        <button id="btn-print" disabled class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white font-black py-4 rounded-xl shadow-lg hover:shadow-xl transition-all text-lg">
-                            🥩 IMPRIMIR ETIQUETA CARNICERÍA
+                        <button id="btn-print" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-xl cursor-not-allowed text-lg">
+                            IMPRIMIR CON MARGEN
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <div class="card p-5 bg-amber-50 border-amber-100">
+                <h3 class="font-bold text-amber-800 text-sm mb-2">⚠️ Nota sobre el margen</h3>
+                <p class="text-xs text-amber-700 leading-relaxed">
+                    Se ha aplicado un margen izquierdo de <b>1 cm (80 dots)</b>. El área de impresión efectiva ahora es de <b>4 cm</b> de ancho. Asegúrate de que los textos no sean demasiado largos.
+                </p>
             </div>
         </section>
 
         <section id="sec-stat" class="hidden-section">
             <div class="card p-6 h-64 flex items-center justify-center text-slate-400">
-                Estadísticas de impresión disponibles.
+                Gráficos de monitoreo disponibles tras la primera impresión.
             </div>
         </section>
     </main>
@@ -135,195 +96,85 @@
             statusIcon: document.getElementById('status-icon'),
             toast: document.getElementById('toast'),
             toastMsg: document.getElementById('toast-msg'),
-            prodName: document.getElementById('prod-name'),
-            barcodeVal: document.getElementById('barcode-val'),
-            peso: document.getElementById('peso'),
-            precioKg: document.getElementById('precio-kg'),
-            total: document.getElementById('total'),
-            fVenta: document.getElementById('fventa'),
-            fVence: document.getElementById('fvence'),
-            preview: document.getElementById('preview')
+            barcode: document.getElementById('barcode-val'),
+            pName: document.getElementById('prod-name')
         };
 
-        // FECHAS POR DEFECTO
-        const today = new Date();
-        ui.fVenta.value = today.toISOString().split('T')[0];
-        const vence = new Date(today.getTime() + 15*24*60*60*1000); // +15 días
-        ui.fVence.value = vence.toISOString().split('T')[0];
-
-        // CALCULAR TOTAL AUTOMÁTICO
-        function calcTotal() {
-            const p = parseFloat(ui.peso.value) || 0;
-            const pr = parseFloat(ui.precioKg.value) || 0;
-            const total = (p * pr).toFixed(2);
-            ui.total.value = total;
-            updatePreview();
-        }
-
-        ui.peso.oninput = calcTotal;
-        ui.precioKg.oninput = calcTotal;
-
-        // PREVISUALIZACIÓN EN TIEMPO REAL
-        function updatePreview() {
-            const prod = ui.prodName.value.toUpperCase().substring(0,22) || "PRODUCTO";
-            const bc = ui.barcodeVal.value || "123456789012";
-            const peso = ui.peso.value || "0.000";
-            const precioKg = ui.precioKg.value || "0.00";
-            const total = ui.total.value || "0.00";
-            const fv = ui.fVenta.value ? ui.fVenta.value.slice(5).replace('-','/') : 'DD/MM';
-            const fve = ui.fVence.value ? ui.fVence.value.slice(5).replace('-','/') : 'DD/MM';
-            
-            ui.preview.innerHTML = `
-                ${prod}<br>
-                D/PECHO<br>
-                PESO ${peso}kg<br>
-                F/VENTA ${fv} F/VENCE ${fve}<br>
-                M+<br>
-                PRECIO ${precioKg}/kg TOTAL A PAGAR ${total}<br>
-                ────────────────────────<br>
-                ${bc}
-            `;
-        }
-
-        // EVENTOS INPUT
-        [ui.prodName, ui.barcodeVal, ui.fVenta, ui.fVence].forEach(el => el.oninput = updatePreview);
-        updatePreview();
-
-        // CONEXIÓN BLUETOOTH (colores rojo)
         function showMsg(m) {
             ui.toastMsg.innerText = m;
             ui.toast.style.opacity = "1";
-            setTimeout(() => ui.toast.style.opacity = "0", 3500);
+            setTimeout(() => ui.toast.style.opacity = "0", 3000);
         }
 
-   async function connectBluetooth() {
-    try {
-        ui.statusIcon.innerText = "🔍";
-        ui.statusLabel.innerText = "Buscando impresoras...";
-        
-        // OPCIÓN 1: PRIMERO INTENTAR CON FILTROS ESPECÍFICOS
-        let device;
-        try {
-            device = await navigator.bluetooth.requestDevice({
-                filters: [
-                    { namePrefix: 'PPT' },
-                    { namePrefix: '3n' },
-                    { name: 'PPT305BT' },
-                    { namePrefix: 'Printer' }
-                ],
-                optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-            });
-        } catch (e1) {
-            // OPCIÓN 2: SI FALLA, MODO "TODOS LOS DISPOSITIVOS"
-            showMsg("Sin impresoras PPT → Mostrando todas");
-            device = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,  // ← SIN filters
-                optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-            });
+        async function connectBluetooth() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: 'PPT' }, { namePrefix: '3n' }, { services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                });
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                const characteristics = await service.getCharacteristics();
+                state.char = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                state.device = device;
+                
+                ui.statusLabel.innerText = device.name;
+                ui.statusIcon.innerText = "🔋";
+                ui.btnConnect.classList.add('hidden');
+                ui.btnDisconnect.classList.remove('hidden');
+                ui.btnPrint.disabled = false;
+                ui.btnPrint.className = "w-full bg-blue-600 text-white font-black py-5 rounded-xl shadow-lg";
+                showMsg("Conectado");
+            } catch (e) { showMsg("Error: " + e.message); }
         }
-        
-        // CONEXIÓN...
-        ui.statusIcon.innerText = "🔄";
-        ui.statusLabel.innerText = "Conectando " + device.name;
-        
-        const server = await device.gatt.connect();
-        const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
-        const characteristics = await service.getCharacteristics();
-        
-        state.char = characteristics.find(c => 
-            c.properties.write || c.properties.writeWithoutResponse
-        ) || characteristics[0]; // Fallback al primero
-        
-        if (!state.char) throw new Error("Sin escritura");
-        
-        state.device = device;
-        ui.statusLabel.innerText = device.name;
-        ui.statusIcon.innerText = "🥩";
-        ui.btnConnect.classList.add('hidden');
-        ui.btnDisconnect.classList.remove('hidden');
-        ui.btnPrint.disabled = false;
-        
-        showMsg("✅ " + device.name + " conectado");
-        
-    } catch (e) {
-        console.error(e);
-        ui.statusIcon.innerText = "📴";
-        ui.statusLabel.innerText = "Error";
-        showMsg("❌ " + e.message);
-    }
-}
+
         ui.btnConnect.onclick = connectBluetooth;
         ui.btnDisconnect.onclick = () => { state.device.gatt.disconnect(); location.reload(); };
 
-        // FORMATO EXACTO COMO LA FOTO 🥩
         ui.btnPrint.onclick = async () => {
-            const prod = ui.prodName.value.toUpperCase().substring(0,22) || "PRODUCTO";
-            const bc = ui.barcodeVal.value || "123456789012";
-            const peso = ui.peso.value.padStart(5,'0') || "0.000";
-            const precioKg = ui.precioKg.value || "0.00";
-            const total = ui.total.value || "0.00";
-            const fv = ui.fVenta.value.slice(8,10)+ui.fVenta.value.slice(5,7);
-            const fve = ui.fVence.value.slice(8,10)+ui.fVence.value.slice(5,7);
-
-            if (!bc || bc.length < 10) return showMsg("❌ Código mínimo 10 dígitos");
+            const bc = ui.barcode.value.trim();
+            const pn = ui.pName.value.trim() || "PRODUCTO";
+            if (!bc) return showMsg("Ingrese un código.");
 
             try {
                 const encoder = new TextEncoder();
+                const MARGEN_IZQUIERDO = 80; // 80 dots ≈ 10mm (para 203 DPI)
+                
                 const cmds = [
-                    // Inicializar + Margen 1cm
-                    new Uint8Array([0x1B, 0x40]),
-                    new Uint8Array([0x1D, 0x4C, 0x50, 0x00]), // Margen izquierdo 80
-                    new Uint8Array([0x0A, 0x0A]), // Margen superior
-
-                    // PRODUCTO (grande)
-                    new Uint8Array([0x1B, 0x61, 0x01]), // Centrar
-                    new Uint8Array([0x1B, 0x21, 0x20]), // Doble altura
-                    encoder.encode(prod + "\n"),
-                    new Uint8Array([0x1B, 0x21, 0x00]),
-
-                    // SUBTÍTULO
-                    new Uint8Array([0x1B, 0x61, 0x00]), // Izquierda
-                    encoder.encode("D/PECHO\n"),
-
-                    // PESO
-                    encoder.encode("PESO " + peso + "kg\n"),
-
-                    // FECHAS
-                    encoder.encode("F/VENTA " + fv + "  F/VENCE " + fve + "\n"),
-
-                    // M+
-                    new Uint8Array([0x1B, 0x61, 0x01]), // Centrar
-                    encoder.encode("M+\n"),
-
-                    // PRECIO/TOTAL
-                    new Uint8Array([0x1B, 0x61, 0x00]), // Izquierda
-                    encoder.encode("PRECIO " + precioKg + "/kg TOTAL A PAGAR " + total + "\n"),
-
-                    // LÍNEA SEPARADORA
-                    encoder.encode("───────────────────────\n"),
-
-                    // CÓDIGO DE BARRAS (centrado, ancho completo)
-                    new Uint8Array([0x1B, 0x61, 0x01]), // Centrar
-                    new Uint8Array([0x1D, 0x68, 0x60]), // Altura 96 dots
-                    new Uint8Array([0x1D, 0x77, 0x03]), // Grosor 3
-                    new Uint8Array([0x1D, 0x6B, 0x04]), // CODE39
+                    new Uint8Array([0x1B, 0x40]),               // 1. Inicializar
+                    
+                    // 2. Configurar margen izquierdo (GS L nL nH)
+                    // 80 en hexadecimal es 0x50. nL = 50, nH = 00
+                    new Uint8Array([0x1D, 0x4C, 0x50, 0x00]), 
+                    
+                    // 3. Margen superior (2 saltos de línea iniciales ≈ 1cm)
+                    new Uint8Array([0x0A, 0x0A]),               
+                    
+                    // 4. Contenido (Nombre)
+                    new Uint8Array([0x1B, 0x61, 0x00]),         // Alineado a la IZQUIERDA del margen
+                    new Uint8Array([0x1B, 0x21, 0x10]),         // Texto grande
+                    encoder.encode(pn.toUpperCase() + "\n"),
+                    
+                    new Uint8Array([0x1B, 0x21, 0x00]),         // Texto normal
+                    encoder.encode("----------------\n\n"),
+                    
+                    // 5. Código de barras (ajustado para caber en los 4cm restantes)
+                    new Uint8Array([0x1D, 0x68, 0x40]),         // Altura un poco menor (64 dots)
+                    new Uint8Array([0x1D, 0x77, 0x02]),         // Grosor barra 2
+                    new Uint8Array([0x1D, 0x6B, 0x04]),         // CODE39
                     encoder.encode(bc),
-                    new Uint8Array([0x00]),
-
-                    // NÚMERO DEBAJO
-                    new Uint8Array([0x1D, 0x42, 0x03]), // Imprimir HRI
-                    encoder.encode(" " + bc + "\n\n"),
-
-                    // FINAL
-                    new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A]),
-                    new Uint8Array([0x1D, 0x56, 0x00]) // Corte
+                    new Uint8Array([0x00]),                     // Fin barcode
+                    
+                    // 6. Finalización
+                    new Uint8Array([0x0A, 0x0A, 0x0A]),         // Espacio bajo el código
+                    new Uint8Array([0x0C])                      // Form Feed (Avanzar a sgte etiqueta)
                 ];
 
-                for (const c of cmds) await state.char.writeValue(c);
-                showMsg("🥩 Etiqueta carn icería impresa ✓");
-            } catch (err) {
-                showMsg("❌ Error de impresión");
-            }
+                for (const c of cmds) {
+                    await state.char.writeValue(c);
+                }
+                showMsg("Imprimiendo con margen...");
+            } catch (err) { showMsg("Error de comunicación."); }
         };
 
         function switchTab(t) {
