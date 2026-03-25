@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Integración Web - 3nStar PPT305BT</title>
+    <title>3nStar PPT305BT - Etiqueta 6x4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -20,16 +20,11 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Chosen Palette: Indigo & Slate (Industrial) -->
-    <!-- Application Structure Plan: Aplicación de una sola página con lógica de conexión Bluetooth mejorada. Se ha implementado un sistema de búsqueda dual: primero intenta filtrar por el servicio estándar de impresoras térmicas (UUID 18f0) y, si falla, permite al usuario ver todos los dispositivos. Esto resuelve el problema de "dispositivos no encontrados" causado por nombres de Bluetooth no estandarizados en la 3nStar. -->
-    <!-- Visualization & Content Choices: Gráficos de Chart.js para monitoreo de etiquetas y sección de depuración técnica para asegurar la compatibilidad con Android Chrome. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
     <nav class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 flex justify-between items-center h-16">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-xs">3N</div>
-                <span class="font-bold text-slate-800">PPT305BT Web</span>
+                <span class="font-bold text-slate-800">PPT305BT 6x4cm</span>
             </div>
             <div class="flex gap-4">
                 <button id="tab-op" class="tab-active py-5 px-1 text-sm" onclick="switchTab('op')">Impresora</button>
@@ -44,15 +39,13 @@
             <span id="toast-msg">Mensaje</span>
         </div>
 
-        <!-- SECCIÓN DE OPERACIÓN -->
         <section id="sec-op" class="space-y-6">
             <div class="card p-6">
                 <div class="flex flex-col md:flex-row gap-8">
-                    <!-- Conector -->
                     <div class="md:w-1/3 flex flex-col items-center justify-center bg-slate-50 rounded-xl p-6 border border-dashed border-slate-300">
                         <div id="status-icon" class="text-5xl mb-4">📴</div>
                         <h2 id="status-label" class="font-bold text-slate-700 text-center">Desconectada</h2>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">3nStar PPT305BT</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Modo Etiqueta Activo</p>
                         
                         <div class="w-full mt-6 space-y-3">
                             <button id="btn-connect" class="btn-primary w-full text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-700">
@@ -67,40 +60,37 @@
                         </div>
                     </div>
 
-                    <!-- Datos -->
                     <div class="md:w-2/3 space-y-4">
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Información del Producto</label>
-                            <input type="text" id="prod-name" placeholder="Nombre del artículo..." class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Nombre del Producto (Máx 20 car.)</label>
+                            <input type="text" id="prod-name" placeholder="Ej: Camisa Polo XL" maxlength="20" class="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Código de Barras</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Código de Barras (CODE39)</label>
                             <div class="flex gap-2">
-                                <input type="text" id="barcode-val" placeholder="Escanear código..." class="flex-grow p-4 bg-white border border-slate-200 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input type="text" id="barcode-val" placeholder="12345678" class="flex-grow p-4 bg-white border border-slate-200 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 outline-none">
                             </div>
                         </div>
 
                         <button id="btn-print" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-xl cursor-not-allowed text-lg shadow-inner">
-                            IMPRIMIR ETIQUETA
+                            IMPRIMIR 6x4 cm
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Ayuda en caso de falla -->
             <div class="card p-5 bg-blue-50 border-blue-100">
                 <h3 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-2">
-                    <span>💡</span> Guía de conexión rápida
+                    <span>📏</span> Configuración 60x40mm
                 </h3>
                 <ul class="text-xs text-blue-700 space-y-2 list-disc ml-4">
-                    <li>Asegúrate de que la impresora no esté conectada a otra aplicación.</li>
-                    <li>Si usas Android, activa el <b>GPS/Ubicación</b>, de lo contrario Chrome no encontrará el Bluetooth.</li>
-                    <li>Para resultados óptimos, vincula la impresora en los ajustes del teléfono antes de usar esta web.</li>
+                    <li>La impresora debe estar en <b>Modo Label</b>.</li>
+                    <li>Este script usa <b>CODE39</b> optimizado para el ancho de 6cm.</li>
+                    <li>Se envía un comando <b>Form Feed (0x0C)</b> al final para alinear la etiqueta.</li>
                 </ul>
             </div>
         </section>
 
-        <!-- SECCIÓN DE MÉTRICAS -->
         <section id="sec-stat" class="hidden-section grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="card p-6">
                 <h3 class="text-center font-bold text-slate-500 text-xs uppercase mb-4">Etiquetas por Hora</h3>
@@ -109,7 +99,7 @@
                 </div>
             </div>
             <div class="card p-6">
-                <h3 class="text-center font-bold text-slate-500 text-xs uppercase mb-4">Estado de Batería (Simulado)</h3>
+                <h3 class="text-center font-bold text-slate-500 text-xs uppercase mb-4">Batería</h3>
                 <div class="chart-container">
                     <canvas id="chart-battery"></canvas>
                 </div>
@@ -150,118 +140,82 @@
 
         function switchTab(t) {
             document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('tab-active');
-                b.classList.add('tab-inactive');
+                b.classList.remove('tab-active'); b.classList.add('tab-inactive');
             });
             document.getElementById('tab-' + t).className = 'tab-active py-5 px-1 text-sm';
-            
             document.getElementById('sec-op').classList.add('hidden-section');
             document.getElementById('sec-stat').classList.add('hidden-section');
             document.getElementById('sec-' + t).classList.remove('hidden-section');
-            
             if(t === 'stat') initCharts();
         }
 
         async function connectBluetooth(filterMode = 'smart') {
             if (!navigator.bluetooth) {
-                showMsg("Error: Su navegador no soporta Bluetooth Web.");
+                showMsg("Bluetooth no soportado en este navegador.");
                 return;
             }
-
             try {
-                let options = {};
-                
-                if (filterMode === 'smart') {
-                    // Estrategia: Buscar por el servicio estándar de impresoras (GATT 18f0)
-                    // y nombres comunes de la marca 3nStar
-                    options = {
-                        filters: [
-                            { services: ['000018f0-0000-1000-8000-00805f9b34fb'] },
-                            { namePrefix: 'PPT' },
-                            { namePrefix: 'MPT' },
-                            { namePrefix: '3n' },
-                            { namePrefix: 'Printer' }
-                        ],
-                        optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-                    };
-                } else {
-                    // Modo "Ver todo" (Aparecerán muchos, pero asegura que esté el tuyo)
-                    options = {
-                        acceptAllDevices: true,
-                        optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-                    };
-                }
+                let options = filterMode === 'smart' ? {
+                    filters: [{ namePrefix: 'PPT' }, { namePrefix: '3n' }, { services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                } : { acceptAllDevices: true, optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] };
 
-                showMsg("Abriendo selector de dispositivos...");
                 const device = await navigator.bluetooth.requestDevice(options);
-                
-                showMsg("Conectando...");
                 const server = await device.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                const characteristics = await service.getCharacteristics();
                 
-                // Buscar característica de escritura
-                const services = await server.getPrimaryServices();
-                let foundChar = null;
-
-                for (const s of services) {
-                    const chars = await s.getCharacteristics();
-                    for (const c of chars) {
-                        if (c.properties.write || c.properties.writeWithoutResponse) {
-                            foundChar = c;
-                            break;
-                        }
-                    }
-                    if (foundChar) break;
-                }
-
-                if (!foundChar) throw new Error("No se pudo hallar el canal de impresión.");
-
+                state.char = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
                 state.device = device;
-                state.char = foundChar;
                 state.isConnected = true;
 
-                // UI Update
-                ui.statusLabel.innerText = device.name || "Impresora Conectada";
+                ui.statusLabel.innerText = device.name;
                 ui.statusIcon.innerText = "🔋";
                 ui.btnConnect.classList.add('hidden');
                 ui.btnShowAll.classList.add('hidden');
                 ui.btnDisconnect.classList.remove('hidden');
                 ui.btnPrint.disabled = false;
-                ui.btnPrint.className = "w-full bg-blue-600 text-white font-black py-5 rounded-xl shadow-lg";
+                ui.btnPrint.className = "w-full bg-blue-600 text-white font-black py-5 rounded-xl shadow-lg hover:bg-blue-700 active:scale-95 transition-all";
 
-                showMsg("¡Conectado exitosamente!");
-
+                showMsg("Conectado a 3nStar");
             } catch (e) {
-                console.error(e);
-                if (e.name !== 'NotFoundError') showMsg("Error: " + e.message);
+                showMsg("Error: " + e.message);
             }
         }
 
         ui.btnConnect.onclick = () => connectBluetooth('smart');
         ui.btnShowAll.onclick = () => connectBluetooth('all');
-
-        ui.btnDisconnect.onclick = () => {
-            if (state.device) state.device.gatt.disconnect();
-            location.reload(); // Reset simple
-        };
+        ui.btnDisconnect.onclick = () => { if (state.device) state.device.gatt.disconnect(); location.reload(); };
 
         ui.btnPrint.onclick = async () => {
             const bc = ui.barcode.value.trim();
-            const pn = ui.pName.value.trim();
+            const pn = ui.pName.value.trim() || "PRODUCTO";
             if (!bc) return showMsg("Ingrese un código.");
 
             try {
                 const encoder = new TextEncoder();
-                // Protocolo ESC/POS para la 3nStar
+                // Ajustes específicos para 60mm x 40mm
                 const cmds = [
-                    new Uint8Array([0x1B, 0x40]), // Inicializar
-                    new Uint8Array([0x1B, 0x61, 0x01]), // Centrar
-                    encoder.encode("\n" + pn.toUpperCase() + "\n\n"),
-                    new Uint8Array([0x1D, 0x68, 0x64]), // Altura 100
-                    new Uint8Array([0x1D, 0x77, 0x03]), // Ancho 3
-                    new Uint8Array([0x1D, 0x6B, 0x04]), // CODE39
+                    new Uint8Array([0x1B, 0x40]),               // Inicializar
+                    new Uint8Array([0x1B, 0x61, 0x01]),         // Centrar todo
+                    
+                    // Texto: Nombre del Producto
+                    new Uint8Array([0x1B, 0x21, 0x10]),         // Altura doble
+                    encoder.encode(pn.toUpperCase() + "\n"),
+                    new Uint8Array([0x1B, 0x21, 0x00]),         // Fuente normal
+                    encoder.encode("--------------------------\n\n"),
+                    
+                    // Código de Barras ajustado a 6cm de ancho
+                    new Uint8Array([0x1D, 0x68, 0x50]),         // Altura barcode (80 pts = 1cm aprox)
+                    new Uint8Array([0x1D, 0x77, 0x02]),         // Ancho de barra 2 (para que no se salga de los 6cm)
+                    new Uint8Array([0x1D, 0x48, 0x02]),         // Mostrar HRI (números) abajo
+                    new Uint8Array([0x1D, 0x6B, 0x04]),         // Formato CODE39
                     encoder.encode(bc),
-                    new Uint8Array([0x00]), // Fin barcode
-                    new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A]) // Salto papel
+                    new Uint8Array([0x00]),                     // Terminador barcode
+                    
+                    // Finalización
+                    new Uint8Array([0x0A, 0x0A]),               // Saltos de línea extra
+                    new Uint8Array([0x0C])                      // FORM FEED: Salta hasta el siguiente GAP (40mm)
                 ];
 
                 for (const c of cmds) {
@@ -269,26 +223,20 @@
                 }
                 showMsg("Imprimiendo...");
             } catch (err) {
-                showMsg("Error al imprimir: " + err.message);
+                showMsg("Error de impresión.");
             }
         };
 
         function initCharts() {
-            new Chart(document.getElementById('chart-hourly'), {
+            const ctx1 = document.getElementById('chart-hourly');
+            if (ctx1.chart) ctx1.chart.destroy();
+            ctx1.chart = new Chart(ctx1, {
                 type: 'line',
                 data: {
                     labels: ['08:00', '10:00', '12:00', '14:00', '16:00'],
-                    datasets: [{ data: [12, 45, 30, 80, 55], borderColor: '#2563eb', tension: 0.3 }]
+                    datasets: [{ data: [5, 25, 15, 40, 20], borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37, 99, 235, 0.1)' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-            new Chart(document.getElementById('chart-battery'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Restante', 'Consumido'],
-                    datasets: [{ data: [75, 25], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth: 0 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false } } }
             });
         }
     </script>
